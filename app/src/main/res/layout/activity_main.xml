@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.courseschedule.ui.DateHeaderView
+        <com.yosuanru.htulist.ui.DateHeaderView
             android:id="@+id/dateHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

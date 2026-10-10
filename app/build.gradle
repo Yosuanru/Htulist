@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.courseschedule'
+    namespace 'com.yosuanru.htulist'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.courseschedule"
+        applicationId "com.yosuanru.htulist"
         minSdk 26
         targetSdk 34
         versionCode 27

@@ -4,14 +4,14 @@
 -keepattributes Signature,InnerClasses,EnclosingMethod
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken { *; }
--keep class com.courseschedule.data.entity.Course { *; }
--keep class com.courseschedule.data.backup.SemesterSnapshot { *; }
--keep class com.courseschedule.data.backup.SettingsSnapshot { *; }
--keep class com.courseschedule.data.backup.ScheduleBackup { *; }
--keep class com.courseschedule.ui.importdata.AcademicSchoolDirectory$DirectoryFile { *; }
--keep class com.courseschedule.ui.importdata.AcademicSchoolDirectory$RawEntry { *; }
--keep class com.courseschedule.ui.importdata.AiWebScheduleRecognizer$AiSchedulePayload { *; }
--keep class com.courseschedule.ui.importdata.AiWebScheduleRecognizer$AiCourse { *; }
+-keep class com.yosuanru.htulist.data.entity.Course { *; }
+-keep class com.yosuanru.htulist.data.backup.SemesterSnapshot { *; }
+-keep class com.yosuanru.htulist.data.backup.SettingsSnapshot { *; }
+-keep class com.yosuanru.htulist.data.backup.ScheduleBackup { *; }
+-keep class com.yosuanru.htulist.ui.importdata.AcademicSchoolDirectory$DirectoryFile { *; }
+-keep class com.yosuanru.htulist.ui.importdata.AcademicSchoolDirectory$RawEntry { *; }
+-keep class com.yosuanru.htulist.ui.importdata.AiWebScheduleRecognizer$AiSchedulePayload { *; }
+-keep class com.yosuanru.htulist.ui.importdata.AiWebScheduleRecognizer$AiCourse { *; }
 
 # Jsoup使用的静态分析注解不参与Android运行时。
 -dontwarn javax.annotation.Nullable
