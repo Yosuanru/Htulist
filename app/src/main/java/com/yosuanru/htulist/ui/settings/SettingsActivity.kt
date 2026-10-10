@@ -735,12 +735,16 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateSectionTimesSummary() {
         val startTimes = preferences.sectionTimes
         val endTimes = preferences.sectionEndTimes
+        val count = minOf(startTimes.size, endTimes.size)
+        if (count == 0) return
+        // 「第 N 节」的 N 必须跟着实际节数走：作息是用户可改的，写死节号改动作息后会变成错的
         binding.tvSectionTimesSummary.text = getString(
             R.string.section_times_summary,
             startTimes.first(),
             endTimes.first(),
-            startTimes.last(),
-            endTimes.last()
+            count,
+            startTimes[count - 1],
+            endTimes[count - 1]
         )
     }
 
