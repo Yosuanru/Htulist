@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_schedule_screen"
+    tools:context=".ui.MainActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="92dp"
+        android:background="@android:color/transparent"
+        android:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.courseschedule.ui.DateHeaderView
+            android:id="@+id/dateHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="8dp" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <!-- 顶部的开源项目链接地址：已按反馈隐藏（留空视图是为了不动既有绑定代码）-->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvProjectLink"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:visibility="gone"
+        android:layout_marginEnd="92dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:contentDescription="@string/open_source_header_link"
+        android:ellipsize="end"
+        android:focusable="true"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingHorizontal="2dp"
+        android:text="@string/project_repository_short"
+        android:textColor="@color/primary"
+        android:textSize="8sp"
+        app:autoSizeMaxTextSize="8sp"
+        app:autoSizeMinTextSize="6sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@id/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintWidth_percent="0.36" />
+
+    <View
+        android:id="@+id/toolbarDivider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/toolbar_divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <LinearLayout
+        android:id="@+id/weekSelector"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="8dp"
+        android:background="@drawable/bg_week_selector"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarDivider">
+
+        <ImageButton
+            android:id="@+id/btnPreviousWeek"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/previous_week"
+            android:padding="8dp"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/text_secondary" />
+
+        <LinearLayout
+            android:id="@+id/weekInfo"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="4dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvCurrentWeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/week_one"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvWeekContext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:gravity="center"
+                android:textColor="@color/text_secondary"
+                android:textSize="10sp"
+                tools:text="本周 · 08.03-08.09" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnNextWeek"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next_week"
+            android:padding="8dp"
+            android:src="@drawable/ic_chevron_right"
+            app:tint="@color/text_secondary" />
+    </LinearLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/weekProgress"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="1dp"
+        android:indeterminate="false"
+        app:indicatorColor="@color/primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/weekSelector"
+        app:trackColor="@color/progress_track"
+        app:trackCornerRadius="1dp"
+        app:trackThickness="2dp" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/weekPager"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:paddingTop="0dp"
+        android:overScrollMode="never"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/weekProgress" />
+
+    <View
+        android:id="@+id/weekProgressThumb"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:alpha="0"
+        android:background="@drawable/bg_week_progress_thumb"
+        android:elevation="2dp"
+        android:scaleX="0.65"
+        android:scaleY="0.65"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@id/weekProgress"
+        app:layout_constraintStart_toStartOf="@id/weekProgress"
+        app:layout_constraintTop_toTopOf="@id/weekProgress" />
+
+    <View
+        android:id="@+id/weekProgressTouchTarget"
+        android:layout_width="0dp"
+        android:layout_height="32dp"
+        android:background="@android:color/transparent"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@id/weekProgress"
+        app:layout_constraintEnd_toEndOf="@id/weekProgress"
+        app:layout_constraintStart_toStartOf="@id/weekProgress"
+        app:layout_constraintTop_toTopOf="@id/weekProgress" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_bottom_navigation"
+        android:elevation="0dp"
+        app:itemActiveIndicatorStyle="@style/CourseScheduleBottomNavigationActiveIndicator"
+        app:itemIconSize="22dp"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemRippleColor="@color/primary_container"
+        app:itemTextColor="@color/nav_item_color"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/menu_bottom_navigation" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

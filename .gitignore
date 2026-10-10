@@ -1,0 +1,41 @@
+# ============================================================
+# HtuList — Android 工程
+# ============================================================
+
+# ---- 构建产物 ----
+**/build/
+.gradle/
+.kotlin/
+*.apk
+*.aab
+*.ap_
+captures/
+.externalNativeBuild/
+.cxx/
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+
+# ---- 本机配置：绝不要提交 ----
+local.properties
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+.env
+.env.*
+
+# ---- 本地运行时 / 临时工作区 ----
+.jdk*/
+.codex-tmp/
+.playwright-cli/
+
+# ---- 图标设计脚本（只在作者本机跑，产物已入库） ----
+design/tools/
+
+# ---- 操作系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
