@@ -118,6 +118,14 @@ class CourseTableView @JvmOverloads constructor(
      * > 0 时：小于行高 → 块变矮并居中；大于行高 → 行高被撑高，超出部分由外层滚动查看。
      */
     private var requestedSectionHeight = 0f
+
+    /**
+     * 上一次 onMeasure 拿到的**真实**可用高度。
+     *
+     * NestedScrollView 会先用 UNSPECIFIED 量一次「自然高度」，这一次拿不到可用高度，
+     * 但绝不能沿用旧的 [sectionHeight]（见 onMeasure 里的说明），只能用它兜底。
+     */
+    private var lastAvailableHeight = 0
     private val timeColumnWidth = dp(48f)
     private val courseInset = dp(3f)
     private val courseCornerRadius = dp(10f)
@@ -466,13 +474,23 @@ class CourseTableView @JvmOverloads constructor(
         // 行高：默认就取「按可用高度均分」；只有用户把课程块高度设得比它还大时，行高才跟着
         //       变大（表格变高，超出部分由外层 NestedScrollView 滚动查看）。
         // 块高：设在行高以内时，课程块按设置值画、在行内居中 —— 这样「往小调」也有意义。
-        val availableHeight = MeasureSpec.getSize(heightMeasureSpec)
-        if (MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.UNSPECIFIED &&
-            availableHeight > 0
-        ) {
+        // NestedScrollView（fillViewport=true）量这个 View 分两步：先用 UNSPECIFIED 量一次
+        // 「自然高度」，只有这次结果小于视口，才会再拿 EXACTLY 量第二遍。
+        //
+        // 所以 UNSPECIFIED 那一次**绝不能沿用旧的 sectionHeight**：一旦它被撑到超过视口，
+        // 就会永远拿不到第二遍 EXACTLY，表格虚高、变成「能滚动」且再也回不来 ——
+        // 不同周的页面是不同的 View 实例，会各自卡在不同状态（表现为「有的周能滑、有的正常」）。
+        // 正确做法：UNSPECIFIED 时用上次记录的真实可用高度重算。
+        val sizeSpec = MeasureSpec.getSize(heightMeasureSpec)
+        val hasRealHeight =
+            MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.UNSPECIFIED && sizeSpec > 0
+        if (hasRealHeight) lastAvailableHeight = sizeSpec
+        val availableHeight = if (hasRealHeight) sizeSpec else lastAvailableHeight
+
+        if (availableHeight > 0) {
+            val requested = requestedSectionHeight
             val fillHeight = (availableHeight.toFloat() / totalSections)
                 .coerceAtLeast(dp(56f))
-            val requested = requestedSectionHeight
             val targetHeight = if (requested > 0f) maxOf(fillHeight, requested) else fillHeight
             val blockHeight = if (requested > 0f) minOf(requested, targetHeight) else targetHeight
             val targetInset = maxOf(courseInset, (targetHeight - blockHeight) / 2f)
@@ -487,6 +505,10 @@ class CourseTableView @JvmOverloads constructor(
         }
 
         totalHeight = totalSections * sectionHeight
+        // 自适应档把总高钉在可用高度以内：浮点误差不该让表格虚高 1px 而凭空可滚动
+        if (requestedSectionHeight <= 0f && availableHeight > 0 && totalHeight > availableHeight) {
+            totalHeight = availableHeight.toFloat()
+        }
         setMeasuredDimension(measuredWidth, totalHeight.roundToInt())
     }
 
