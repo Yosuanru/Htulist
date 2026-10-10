@@ -4,10 +4,12 @@
 > 课表、待办、提醒都在本机，不注册账号、不上传数据、不需要自建服务器。
 
 <p align="center">
-  <img src="docs/screenshots/schedule.png" width="240" alt="周课表">
-  <img src="docs/screenshots/todo.png" width="240" alt="待办清单">
-  <img src="docs/screenshots/settings.png" width="240" alt="设置">
+  <img src="docs/screenshots/schedule.png" width="200" alt="周课表">
+  <img src="docs/screenshots/todo.png" width="200" alt="待办清单">
+  <img src="docs/screenshots/import.png" width="200" alt="导入课程">
+  <img src="docs/screenshots/settings.png" width="200" alt="设置">
 </p>
+<p align="center"><sub>截图中的课程为演示用测试数据；安装后首次打开是空课表</sub></p>
 
 ---
 
