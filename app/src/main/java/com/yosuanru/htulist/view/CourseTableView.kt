@@ -106,10 +106,18 @@ class CourseTableView @JvmOverloads constructor(
     private var sectionHeight = dp(64f)
 
     /**
-     * 用户在设置里选的「课程块高度」。实际行高由 [onMeasure] 取它和铺满所需的较大者，
-     * 所以它是一条下限，而不是最终值。
+     * 课程块在行内的垂直留白。设置「自适应」时等于 [courseInset]（块铺满行）；
+     * 设置具体高度且小于行高时，块按该高度居中，多出来的空间对半分到这里。
      */
-    private var requestedSectionHeight = dp(64f)
+    private var verticalInset = dp(3f)
+
+    /**
+     * 用户在设置里选的「课程块高度」。
+     *
+     * <= 0 表示自适应：行高铺满可用高度，块也铺满行。
+     * > 0 时：小于行高 → 块变矮并居中；大于行高 → 行高被撑高，超出部分由外层滚动查看。
+     */
+    private var requestedSectionHeight = 0f
     private val timeColumnWidth = dp(48f)
     private val courseInset = dp(3f)
     private val courseCornerRadius = dp(10f)
@@ -453,20 +461,26 @@ class CourseTableView @JvmOverloads constructor(
         dayWidth = measuredDayWidth
         totalWidth = measuredWidth.toFloat()
 
-        // 节数少时，固定行高会让表格占不满一屏、下面空出一截，看着很割裂。
-        // 所以行高取「按可用高度均分」与「用户设置的课程块高度」两者中较大的一个：
-        //   * 设置值小于铺满所需 → 按铺满走，屏幕永远不留白，设置不生效（这是预期行为）；
-        //   * 设置值大于铺满所需 → 表格变高，超出部分由外层 NestedScrollView 滚动查看。
-        // 两边都设 56dp 下限，避免极端小屏把格子压没。
+        // 节数少时，固定行高会让表格占不满一屏、下面空出一截，看着很割裂，所以要铺满。
+        //
+        // 行高：默认就取「按可用高度均分」；只有用户把课程块高度设得比它还大时，行高才跟着
+        //       变大（表格变高，超出部分由外层 NestedScrollView 滚动查看）。
+        // 块高：设在行高以内时，课程块按设置值画、在行内居中 —— 这样「往小调」也有意义。
         val availableHeight = MeasureSpec.getSize(heightMeasureSpec)
         if (MeasureSpec.getMode(heightMeasureSpec) != MeasureSpec.UNSPECIFIED &&
             availableHeight > 0
         ) {
             val fillHeight = (availableHeight.toFloat() / totalSections)
                 .coerceAtLeast(dp(56f))
-            val targetHeight = maxOf(fillHeight, requestedSectionHeight)
-            if (abs(targetHeight - sectionHeight) > 0.5f) {
+            val requested = requestedSectionHeight
+            val targetHeight = if (requested > 0f) maxOf(fillHeight, requested) else fillHeight
+            val blockHeight = if (requested > 0f) minOf(requested, targetHeight) else targetHeight
+            val targetInset = maxOf(courseInset, (targetHeight - blockHeight) / 2f)
+            if (abs(targetHeight - sectionHeight) > 0.5f ||
+                abs(targetInset - verticalInset) > 0.5f
+            ) {
                 sectionHeight = targetHeight
+                verticalInset = targetInset
                 courseBoundsCache.clear()
                 courseTextLayoutCache.clear()
             }
@@ -1036,8 +1050,8 @@ class CourseTableView @JvmOverloads constructor(
         resetCoursePress()
         val selection = QuickAddSelection(dayOfWeek, section, section, section)
         quickAddSelection = selection
-        quickAddVisualTop = (section - 1) * sectionHeight + courseInset
-        quickAddVisualBottom = section * sectionHeight - courseInset
+        quickAddVisualTop = (section - 1) * sectionHeight + verticalInset
+        quickAddVisualBottom = section * sectionHeight - verticalInset
         quickAddDragging = true
         touchMoved = true
         dismissSelectionOnUp = false
@@ -1076,8 +1090,8 @@ class CourseTableView @JvmOverloads constructor(
             accessibilityHelper.invalidateRoot()
         }
 
-        val anchorTop = (selection.anchorSection - 1) * sectionHeight + courseInset
-        val anchorBottom = selection.anchorSection * sectionHeight - courseInset
+        val anchorTop = (selection.anchorSection - 1) * sectionHeight + verticalInset
+        val anchorBottom = selection.anchorSection * sectionHeight - verticalInset
         quickAddVisualTop = if (clampedY < anchorTop) {
             clampedY.coerceAtLeast(courseInset)
         } else {
@@ -1095,8 +1109,8 @@ class CourseTableView @JvmOverloads constructor(
         quickAddDragging = false
         parent?.requestDisallowInterceptTouchEvent(false)
         val selection = quickAddSelection ?: return
-        val targetTop = (selection.startSection - 1) * sectionHeight + courseInset
-        val targetBottom = selection.endSection * sectionHeight - courseInset
+        val targetTop = (selection.startSection - 1) * sectionHeight + verticalInset
+        val targetBottom = selection.endSection * sectionHeight - verticalInset
         animateQuickAddBounds(targetTop, targetBottom)
         announceForAccessibility(quickAddAnnouncement(selection))
     }
@@ -1259,9 +1273,10 @@ class CourseTableView @JvmOverloads constructor(
             this.sectionTimes = SchedulePreferences.DEFAULT_SECTION_TIMES
             this.sectionEndTimes = SchedulePreferences.DEFAULT_SECTION_END_TIMES
         }
-        requestedSectionHeight = dp(sectionHeightDp.coerceIn(56, MAX_SECTION_HEIGHT_DP).toFloat())
-        // 先用设置值兜底，onMeasure 再按可用高度取较大者
-        sectionHeight = requestedSectionHeight
+        // 0 = 自适应；其余按 dp 存，实际行高/块高由 onMeasure 结合可用高度决定
+        val heightDp = sectionHeightDp.coerceIn(0, MAX_SECTION_HEIGHT_DP)
+        requestedSectionHeight = if (heightDp > 0) dp(heightDp.toFloat()) else 0f
+        verticalInset = courseInset
         rebuildVisibleCourses()
         clearCourseRenderCaches()
         accessibilityHelper.invalidateRoot()
@@ -1297,9 +1312,9 @@ class CourseTableView @JvmOverloads constructor(
     private fun courseBounds(course: Course): RectF = courseBoundsCache.getOrPut(course) {
         RectF(
             timeColumnWidth + (course.dayOfWeek - 1) * dayWidth + courseInset,
-            (course.startSection - 1) * sectionHeight + courseInset,
+            (course.startSection - 1) * sectionHeight + verticalInset,
             timeColumnWidth + course.dayOfWeek * dayWidth - courseInset,
-            course.endSection * sectionHeight - courseInset
+            course.endSection * sectionHeight - verticalInset
         )
     }
 

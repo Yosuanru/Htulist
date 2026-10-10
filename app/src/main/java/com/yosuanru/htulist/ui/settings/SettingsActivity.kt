@@ -95,10 +95,13 @@ class SettingsActivity : AppCompatActivity() {
     private val motionInterpolator = PathInterpolator(0.22f, 1f, 0.36f, 1f)
 
     /**
-     * 「课程块高度」的可选值。它是一条下限：小于铺满所需高度时不生效（表格本来就会铺满），
-     * 大于时才真的把格子撑高、靠外层滚动查看。所以上档位必须够大才有意义。
+     * 「课程块高度」的可选值，单位 dp。[SchedulePreferences.HEIGHT_AUTO]（0）= 自适应。
+     *
+     * 行高永远至少铺满一屏（否则下面会空出一截）。具体值的作用：
+     *   * 小于行高 → 课程块按该高度绘制、在行内居中，块与块之间留出呼吸空间；
+     *   * 大于行高 → 行高被撑高，整表可上下滚动。
      */
-    private val sectionHeightValues = intArrayOf(56, 72, 88, 104, 120, 144)
+    private val sectionHeightValues = intArrayOf(0, 56, 72, 88, 104, 120, 144)
     private val reminderValues = intArrayOf(-1, 5, 10, 15, 30, 60)
 
     private val createExportDocument = registerForActivityResult(
@@ -136,7 +139,10 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchShowTime.isChecked = preferences.showTime
         binding.switchReminder.isChecked = preferences.reminderEnabled
 
-        val heightLabels = sectionHeightValues.map { getString(R.string.height_dp_format, it) }
+        val heightLabels = sectionHeightValues.map {
+            if (it == SchedulePreferences.HEIGHT_AUTO) getString(R.string.height_auto)
+            else getString(R.string.height_dp_format, it)
+        }
         binding.spinnerSectionHeight.adapter = simpleSpinnerAdapter(heightLabels)
         // 存档里的旧值（如 64/84）可能已不在候选列表里，取最接近的一档，避免静默改写用户设置
         val storedHeight = preferences.sectionHeightDp

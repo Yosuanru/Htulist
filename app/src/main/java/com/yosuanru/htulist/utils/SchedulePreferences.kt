@@ -10,9 +10,11 @@ class SchedulePreferences(context: Context) {
 
     init {
         if (!prefs.getBoolean(KEY_COMPACT_DENSITY_MIGRATED, false)) {
+            // 早先的「紧凑密度」迁移会写死 64dp；现在 0 = 自适应（行高铺满、课程块也铺满行），
+            // 这才是想要的默认观感，所以一并归一化回 0。
             val editor = prefs.edit()
-            if (prefs.getInt(KEY_SECTION_HEIGHT, 72) == 72) {
-                editor.putInt(KEY_SECTION_HEIGHT, 64)
+            if (prefs.getInt(KEY_SECTION_HEIGHT, HEIGHT_AUTO) in 1..104) {
+                editor.putInt(KEY_SECTION_HEIGHT, HEIGHT_AUTO)
             }
             editor.putBoolean(KEY_COMPACT_DENSITY_MIGRATED, true).apply()
         }
@@ -30,8 +32,14 @@ class SchedulePreferences(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_INACTIVE_COURSES, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_INACTIVE_COURSES, value).apply()
 
+    /**
+     * 课程块高度（dp）。
+     *
+     * [HEIGHT_AUTO]（0）表示自适应：行高铺满可用高度，课程块也铺满整行。
+     * 大于 0 时：小于行高 → 块变矮、行内居中；大于行高 → 行高被撑高，整表可滚动。
+     */
     var sectionHeightDp: Int
-        get() = prefs.getInt(KEY_SECTION_HEIGHT, 64)
+        get() = prefs.getInt(KEY_SECTION_HEIGHT, HEIGHT_AUTO)
         set(value) = prefs.edit().putInt(KEY_SECTION_HEIGHT, value).apply()
 
     var reminderEnabled: Boolean
@@ -95,7 +103,7 @@ class SchedulePreferences(context: Context) {
             .putBoolean(KEY_SHOW_WEEKEND, snapshot.showWeekend)
             .putBoolean(KEY_SHOW_TIME, snapshot.showTime)
             .putBoolean(KEY_SHOW_INACTIVE_COURSES, snapshot.showInactiveCourses)
-            .putInt(KEY_SECTION_HEIGHT, snapshot.sectionHeightDp.coerceIn(56, 200))
+            .putInt(KEY_SECTION_HEIGHT, snapshot.sectionHeightDp.coerceIn(0, 200))
             .putBoolean(KEY_REMINDER_ENABLED, snapshot.reminderEnabled)
             .putInt(KEY_DEFAULT_REMINDER, snapshot.defaultReminderMinutes)
             .putString(KEY_SECTION_TIMES, times.joinToString(","))
@@ -110,6 +118,9 @@ class SchedulePreferences(context: Context) {
         private const val KEY_SHOW_TIME = "show_time"
         private const val KEY_SHOW_INACTIVE_COURSES = "show_inactive_courses"
         private const val KEY_SECTION_HEIGHT = "section_height_dp"
+
+        /** 「课程块高度」= 自适应：行高铺满，课程块也铺满整行 */
+        const val HEIGHT_AUTO = 0
         private const val KEY_COMPACT_DENSITY_MIGRATED = "compact_density_migrated_v2"
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"
         private const val KEY_DEFAULT_REMINDER = "default_reminder_minutes"

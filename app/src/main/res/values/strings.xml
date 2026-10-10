@@ -324,6 +324,7 @@
     <string name="show_section_time">显示节次时间</string>
     <string name="course_block_height">课程块高度</string>
     <string name="height_dp_format">%d dp</string>
+    <string name="height_auto">自适应（铺满行高）</string>
     <string name="course_reminders">课程提醒</string>
     <string name="enable_reminders">启用课程提醒</string>
     <string name="default_reminder_time">默认提前时间</string>
